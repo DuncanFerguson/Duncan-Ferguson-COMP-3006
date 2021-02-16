@@ -1,5 +1,14 @@
 import random
 
+# This is a game of Black Jack. There are Card, Deck, Table and Hand Classes.
+# The Program starts with dealgame. A player is asked if they would like to play the game and how many players
+# They would like to add. After which those players are asked for their name into the Table Class.
+# After the players are entered. The Game Begins. The dealer calls up the deck function, shuffles and deals each player
+# Two cards into their hand. The table is then called up. And each player goes through the hit loop
+# function. The dealer goes first due to his spot on the list.
+# The dealer will automatically hit until he or she gets 17. After the dealer will stay.
+# The rest of the players will then continue to hit through the loophit function. If they bust or get 21 or choose to
+# Stay they get out of the loop
 
 class Card:
     """ Card Class to keep track of the card details (suit/color, value, etc."""
@@ -10,7 +19,7 @@ class Card:
 ##Display The Face Cards
     def __str__(self):
         """Displaying the cards face values"""
-        displayval = str(self.value)  # shallow copy?
+        displayval = str(self.value)  # shallow copy for the purpose of display
         if self.value == 1: displayval = "Ace"
         elif self.value == 11: displayval = "Jack"
         elif self.value == 12: displayval = "Queen"
@@ -22,51 +31,52 @@ class Deck:
     """ Building a Deck out of the Cards"""
     def __init__(self):
         """Storying a Deck of Cards"""
-        self.cards = []
+        self.cards = []  # Class list of cards make up the deck
         self.create_deck()
 
     def create_deck(self):
         """Making a normal 52 card deck. Ace counting as 1"""
         for suit in ["Spades", "Clubs", "Diamonds", "Hearts"]:
             for value in range(1, 14):
-                self.cards.append(Card(suit, value))
+                self.cards.append(Card(suit, value))  # Appending individual cards to self.cards list
 
     def shuffle(self):
         """Shuffling the Deck three times. It is more of a wash pile shuffle than
         traditional"""
         random.shuffle(self.cards)
+        random.shuffle(self.cards)
+        random.shuffle(self.cards)
 
     def show_deck(self):
-        """Used for testing reasons"""
+        """This function shows the cards that are in the self.cards list. Primarily used for testing reasons"""
         for card in self.cards:
             card.show()
 
     def deck_count(self):
-        """Used for testing reasons"""
+        """This function counts the amount of cards that are in the deck. It is used primarily for testing reasons"""
         print(len(self.cards))
 
     def dealcard(self):
         """Deal a card and pop it off of the deck"""
-        single_card = self.cards.pop()
-        return single_card
+        return self.cards.pop()
 
 
 class Table:
     """Creating a class of Players"""
-    players = []
+    players = ["Dealer"]  # Every Game Must Have a Dealer!
 
     def __init__(self, player):
-        """Storing Player Info"""
+        """Adding Players to the table. This is a list of 'strings' """
         self.players.append(player)
 
-    def showtable(self):
-        print(self.players)
-
     def return_table(self):
+        """This function returns the list of players. """
         return self.players
+
 
 class Hand:
     def __init__(self, nam):
+        """The hand class is composed of a name, a list of cards, a card value count, and an ace card count"""
         self.name = nam  # Naming the players hand
         self.cards = []  # No Cards in the hand to start
         self.value = 0  # Hand Starts with a count of zero
@@ -96,12 +106,15 @@ def show_hand(player, name):
 
 
 def loophit(hittinghand, name, deck):
-    """Looping through hits"""
-    keephitting = True
+    """Loop Hit is the process of a player deciding to stay or add a card. If they add to many cards that add to
+    a value over 21 they bust. In this function the dealer goes first. The dealer will continue to hit until the
+    dealer has a hand of 17 after this the dealer will stay. The next up will be the players prompted. The loop
+    is composed of the players hand, name, and the deck of cards."""
+    keephitting = True  # Adding a loop to keep the function going while the player wants to continue
     while keephitting:
-        if hittinghand.value == 21:
+        if hittinghand.value == 21:  # 21 is an automatic win
             return hittinghand.value
-        elif hittinghand.value > 21:
+        elif hittinghand.value > 21:  # If the hand is over 21 return 0. Indicating a loss.
             print(name, "Busts\n")
             return 0
         elif hittinghand.value < 21:
@@ -114,7 +127,7 @@ def loophit(hittinghand, name, deck):
                 print("Dealer Stays\n")
                 return hittinghand.value
             else:
-                h_n = input("Would you Like another Card (Y/N)?\n")
+                h_n = input("Would you Like another Card (Y/N)?\n")  # Player input for deciding to add a card
                 if h_n.lower() == "y":
                     hittinghand.add_card(deck.dealcard())
                     show_hand(hittinghand, name)
@@ -124,53 +137,65 @@ def loophit(hittinghand, name, deck):
 
 
 def scoretable(game_dict):
-    """This function scores the table and determines the winner"""
-    #TODO Make sure the dealer wins if there is a tie
-    print(game_dict)
+    """This function scores the table and determines the winner. If there is a tie the Dealer Wins!"""
+    # Printing out the game results.
+    for val in game_dict:
+        if game_dict[val] == 0: print(val, ": Bust")
+        else: print(val, ":", game_dict[val])
 
-    maxhand = list(game_dict.values())
-    # players = list(game_dict.keys())
-    winning_hand = max(maxhand)
+    # Finding The winning hand. If there is a tie the dealer wins.
+    winning_hand = max(list(game_dict.values()))  # Picking the winning Hand
     for player in game_dict:
         if game_dict[player] == winning_hand:
             if player == "Dealer":
-                print(player," wins with ", winning_hand)
+                print(player, "wins with", winning_hand)
+                break
             else:
-                print(player, " wins with ", winning_hand)
+                print(player, "wins with", winning_hand)
 
 
 def dealgame():
-    """Dealing the Game"""
-    playgame = input("Would You Like To Play Black Jack (Y/N)?\n")
+    """This is the main function of the game. It starts with an empty dictionary and asks for the user input.
+    The number of players are selected. Those are then put into the seat table class. From there the dealer
+    creates the deck and then shuffles it. The dealer then hits his own hand. Then subsequent players. """
+    member_score_dict = {}  # Blank Dictionary for keeping score
+    try:
+        playgame = input("Would You Like To Play Black Jack (Y/N)?")  # Starting the game.
+    except: pass  # If y is not entered the game ends
+
     if playgame.lower() == "y":
-        deck = Deck()
-        deck.shuffle()
+        deck = Deck()  # Creating the deck from the deck class
+        deck.shuffle()  # Shuffling the cards from the deck class
     else:
         print("Good Bye")
         exit()
 
-    seat = Table("Dealer")
-    num_players = int(input("How Many Players? "))
+    # Number of player input
+    while True:
+        try:
+            num_players = int(input("How Many Players? "))
+            break
+        except ValueError: print("Not a valid Integer")
+
+    # Setting the table with that amount of players. Asking each for their name.
     for seat in range(num_players):
-        seat = Table(input("Enter Player Name: "))
-    member_score_dict = {}
+        seat = Table(input("Enter Player Name: "))  # Calling in the stable Class
 
-    #Dealing deck for both players
+    # Dealing deck for players in game
     for member in seat.return_table():
-        member_hand = Hand(member)
-        member_hand.add_card(deck.dealcard())
-        member_hand.add_card(deck.dealcard())
-        show_hand(member_hand, member)
-        member_score_dict[member] = loophit(member_hand, member, deck)
-
-    scoretable(member_score_dict)
+        member_hand = Hand(member)  # Deep Copy
+        member_hand.add_card(deck.dealcard())  # Initial Dealing Card
+        member_hand.add_card(deck.dealcard())  # Initial Dealing Card
+        show_hand(member_hand, member)  # Displaying the and
+        member_score_dict[member] = loophit(member_hand, member, deck)  # Running through the hit loop
+    scoretable(member_score_dict)  # Calling up the End Game Score
     print("Game Over\n")
-    # dealgame()
 
 
 def main():
-    """Starting the Game"""
+    """Starting the Game by running dealgame"""
     dealgame()
 
 
-main()
+if __name__ == "__main__":
+    main()
